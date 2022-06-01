@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef struct {
+    int **adj;
+    int n;
+} Grafo;
+
 typedef struct pessoa {
     int id;
     char CPF[12];
@@ -160,10 +165,10 @@ void emOrdem_ArvAVL(ArvAVL *raiz)
     if (*raiz != NULL)
     {
         emOrdem_ArvAVL(&((*raiz)->esq));
-        printf("\n\nID da pessoa:  %d: \n", (*raiz)->pessoas->id);
-        printf("CPF da pessoa: %s: \n", (*raiz)->pessoas->CPF);
-        printf("NOME da pessoa:  %s: \n", (*raiz)->pessoas->nome);
-        printf("SOBRENOME da pessoa: %s: \n", (*raiz)->pessoas->sobrenome);
+        printf("\n\nID da pessoa:  %d \n", (*raiz)->pessoas->id);
+        printf("CPF da pessoa: %s \n", (*raiz)->pessoas->CPF);
+        printf("NOME da pessoa:  %s \n", (*raiz)->pessoas->nome);
+        printf("SOBRENOME da pessoa %s \n", (*raiz)->pessoas->sobrenome);
         printf("----------------------------------------------\n");
         emOrdem_ArvAVL(&((*raiz)->dir));
     }
@@ -174,34 +179,130 @@ void emOrdem_ArvAVL(ArvAVL *raiz)
     */
 }
 
+void verificarIdPessoa(ArvAVL *raiz, int id)
+{
+    if (raiz == NULL)
+        return;
+    if (*raiz != NULL)
+    {
+        verificarIdPessoa(&((*raiz)->esq), id);
+        if ((*raiz)->pessoas->id == id) {
+            printf("NOME da pessoa:  %s \n", (*raiz)->pessoas->nome);
+        }
+        verificarIdPessoa(&((*raiz)->dir), id);
+        
+    }
+}
+
+void inicia_grafo(Grafo *g, int n) {
+    int i, j;
+    g->n = n;
+    g->adj = malloc(n * sizeof(int *));
+    for (i = 0; i < n; i++)
+        g->adj[i] = malloc(n * sizeof(int));
+    for (i = 0; i < n; i++)
+        for (j = 0; j < n; j++)
+            g->adj[i][j] = 0;
+}
+
+void insere_aresta (Grafo *g, int u, int v) {
+    g->adj[u][v] = 1;
+    g->adj[v][u] = 1;
+}
+
+void le_grafo(Grafo *g) {
+    int m, i, u, v;
+    printf("Digite quantas amizades quer relacionar: ");
+    scanf("%d", &m);
+    for (i = 0; i < m; i++) {
+        printf("Digite os IDs de 2 pessoas: ");
+        scanf("%d %d", &u, &v);
+        insere_aresta(g, u, v);
+    }
+}
+
+void imprime_amigos(Grafo *g, ArvAVL *raiz, int id) {
+    int u, v;
+    for (v = 0; v < g->n; v++) {
+        if (v != id) {
+            if (g->adj[id][v]) {
+                verificarIdPessoa(raiz,v);
+            }   
+        }
+    }
+}
+
+void imprime_amigosDosAMigos(Grafo *g, ArvAVL *raiz) {
+    int u, v, id;
+    printf("Digite o id de quem deseja ver os amigos dos amigos dessa pessoa: ");
+    scanf("%d", &id);
+    for (v = 0; v < g->n; v++) {
+        if (g->adj[id][v]) {
+            imprime_amigos(g,raiz, v);
+        }
+    }
+}
+
+int tem_aresta(Grafo g, int u, int v) {
+    return g.adj[u][v];
+}
+
+void menu() {
+    int i;
+    for (i = 0; i < 50; i++)
+    {
+        putchar('-');
+    }
+    printf("\n\t Menu de opcoes \n\t");
+    printf("1 - Cadastrar pessoa\n");
+    printf("\t2 - Imprimir pessoas\n");
+    printf("\t3 - Cadastrar uma amizade entre 2 pessoas\n");
+    printf("\t4 - Exibir amizades de uma pessoa\n");
+    printf("\t5 - Exibir amizades das amizades de uma pessoa\n");
+    for (i = 0; i < 50; i++)
+    {
+        putchar('-');
+    }
+    
+}
+
 int main () {
-    int idPessoa= 0;
-    int idArvoreAVL = 0;
+    Grafo *g = malloc(sizeof(Grafo));
+    inicia_grafo(g, 50);
+    int idPessoa= 1;
+    int idArvoreAVL = 1;
     int res;
+    int idVerAMigos;
     ArvAVL* avl;
     avl = cria_ArvAVL();
     pessoa *p;
     int op;
     while (op != 0) {
+        menu();
         printf("\nDigite a opcao: ");
         scanf("%d", &op);
         switch (op)
         {
         case 1:
-            /* p = cadastrarPessoa(idPessoa);
-            idPessoa++;
-            res = insere_ArvAVL(avl,p, idArvoreAVL);
-            idArvoreAVL++; */
             p = ler_pessoa(idPessoa);
             idPessoa++;
             res = insere_ArvAVL(avl,p, idArvoreAVL);
             idArvoreAVL++;
-            /* inserir_AVL(&avl, p, idArvoreAVL);
-            idPessoa++;
-            idArvoreAVL++; */
             break;
         case 2:
             emOrdem_ArvAVL(avl);
+            break;
+        case 3:
+            
+            le_grafo(g);
+            break;
+        case 4:
+            printf("Digite o id de quem deseja ver as amizades: ");
+            scanf("%d", &idVerAMigos);
+            imprime_amigos(g, avl, idVerAMigos);
+            break;
+        case 5:
+            imprime_amigosDosAMigos(g, avl);
             break;
         default:
             printf("\nSaindo...\n");

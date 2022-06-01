@@ -17,34 +17,37 @@ void inicia_grafo(Grafo *g, int n) {
             g->adj[i][j] = 0;
 }
 
-void insere_aresta (Grafo g, int u, int v) {
-    g.adj[u][v] = 1;
-    g.adj[v][u] = 1;
+void insere_aresta (Grafo *g, int u, int v) {
+    g->adj[u][v] = 1;
+    g->adj[v][u] = 1;
 }
 
 void le_grafo(Grafo *g) {
-    int n, m, i, u, v;
-    scanf("Oi: %d %d", &n, &m);
-    inicia_grafo(g, n);
-    for (i = 0; i < m; i++) {
+    int m, i, u, v;
+    for (i = 0; i < 2; i++) {
+        printf("Digite os IDs das 2 pessoas: ");
         scanf("%d %d", &u, &v);
-        insere_aresta(*g, u, v);
+        insere_aresta(g, u, v);
     }
 }
 
-void imprime_arestas(Grafo g) {
+void imprime_arestas(Grafo *g) {
     int u, v;
-    for (u = 0; u < g.n; u++)
-    for (v = u+1; v < g.n; v++)
-    if (g.adj[u][v])
-    printf("{%d,%d}\n", u, v);
+    for (u = 0; u < g->n; u++) {
+        for (v = 0; v < g->n; v++) {
+            if (g->adj[u][v]) {
+                printf("{%d,%d}\n", u, v);
+            }
+            
+        }
+    }
 }
 
 int main () {
     Grafo *g;
-    inicia_grafo(g, 5);
-
+    inicia_grafo(g, 50);
     le_grafo(g);
-
-    imprime_arestas(*g);
+    imprime_arestas(g);
+    putchar('\n');
+    system("pause");
 }
